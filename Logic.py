@@ -10,48 +10,73 @@ final_weights = None
 num_of_epochs = 0
 allowable_error = 0
 
+# AUXILIAR METHODS
+def first_initial_weights(num_characteristics):
+    weigths = np.random.uniform(low=0, high=1, size=(num_characteristics + 1, 1)).round(4)
+    return weigths
+
+def calculate_u(columns_x, weigths):
+    u = np.dot(columns_x, weigths)
+    return u
+
+def calculate_yc(u):
+    return np.where(u >= 0, 1, 0).reshape(-1, 1)
+
+def calculate_error(columns_y, calculated_y):
+    return columns_y.reshape(-1, 1) - calculated_y
+
+def calculate_norma_error(found_errors):
+    return np.linalg.norm(found_errors)
+
+def calculate_delta_w(eta, product_found_errors):
+    return eta * product_found_errors
+
+def calculate_new_weigths(delta_w):
+    return np.round(delta_w, 4)
+
+# TRAINING AND RESULT METHODS
 def train_perceptron(eta, epochs, file_path, progress_bar):
     global error_norm_by_epoch, weigth_evolution, initial_weights, num_of_epochs, final_weights
 
     error_norm_by_epoch.clear()
     weigth_evolution.clear()
 
-    delimitador = ';'
+    delimiter = ';'
     
     data_frame = pd.read_csv(
         file_path, 
-        delimiter=delimitador,
+        delimiter=delimiter,
         header=None
         )
 
     num_characteristics = len(data_frame.columns) - 1
-
-    weigths = np.random.uniform(low=0, high=1, size=(num_characteristics + 1, 1)).round(4)
+    weigths = first_initial_weights(num_characteristics)
+    print("Initial Weigths:")
+    print(weigths)
+    
     columns_x = np.hstack([data_frame.iloc[:, :-1].values, np.ones((data_frame.shape[0], 1))])
     columns_y = np.array(data_frame.iloc[:, -1])
 
     initial_weights = weigths.copy()
     num_of_epochs = epochs
-    print("Initial Weigths:")
-    print(weigths)
 
     for i in range(num_characteristics + 1):
         weigth_evolution.append([])
 
     for epoch in range(epochs):
-        u = np.dot(columns_x, weigths)
-        calculated_y = np.where(u >= 0, 1, 0).reshape(-1, 1)
-        found_errors = columns_y.reshape(-1, 1) - calculated_y
+        u = calculate_u(columns_x, weigths)
+        calculated_y = calculate_yc(u)
+        found_errors = calculate_error(columns_y, calculated_y)
 
-        norma_error = np.linalg.norm(found_errors)
+        norma_error = calculate_norma_error(found_errors)
         error_norm_by_epoch.append(norma_error)
 
         for i in range(num_characteristics + 1):
             weigth_evolution[i].append(weigths[i, 0])
 
         product_found_errors = np.dot(columns_x.T, found_errors)
-        delta_w = eta * product_found_errors
-        weigths += np.round(delta_w, 4)
+        delta_w = calculate_delta_w(eta, product_found_errors)
+        weigths += calculate_new_weigths(delta_w)
 
         # Update the progress bar
         progress_bar['value'] = (epoch + 1) / epochs * 100
