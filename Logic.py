@@ -11,6 +11,16 @@ num_of_epochs = 0
 allowable_error = 0
 
 # AUXILIAR METHODS
+def read_data_set(file_path):
+    delimiter = ';'
+    
+    data_frame = pd.read_csv(
+        file_path, 
+        delimiter=delimiter,
+        header=None
+        )
+    return data_frame
+
 def first_initial_weights(num_characteristics):
     weigths = np.random.uniform(low=0, high=1, size=(num_characteristics + 1, 1)).round(4)
     return weigths
@@ -41,13 +51,7 @@ def train_perceptron(eta, epochs, file_path, progress_bar):
     error_norm_by_epoch.clear()
     weigth_evolution.clear()
 
-    delimiter = ';'
-    
-    data_frame = pd.read_csv(
-        file_path, 
-        delimiter=delimiter,
-        header=None
-        )
+    data_frame = read_data_set(file_path)
 
     num_characteristics = len(data_frame.columns) - 1
     weigths = first_initial_weights(num_characteristics)
