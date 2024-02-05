@@ -25,7 +25,7 @@ def calculate_yc(u):
 def calculate_error(columns_y, calculated_y):
     return columns_y.reshape(-1, 1) - calculated_y
 
-def calculate_norma_error(found_errors):
+def calculate_norm_error(found_errors):
     return np.linalg.norm(found_errors)
 
 def calculate_delta_w(eta, product_found_errors):
@@ -68,7 +68,7 @@ def train_perceptron(eta, epochs, file_path, progress_bar):
         calculated_y = calculate_yc(u)
         found_errors = calculate_error(columns_y, calculated_y)
 
-        norma_error = calculate_norma_error(found_errors)
+        norma_error = calculate_norm_error(found_errors)
         error_norm_by_epoch.append(norma_error)
 
         for i in range(num_characteristics + 1):
